@@ -53,7 +53,7 @@ export default function InstallPrompt() {
   if (state === 'hidden') return null;
 
   return (
-    <div className="mx-4 mb-4 bg-amber-400/10 border border-amber-400/30 rounded-xl px-4 py-3 flex items-center gap-3">
+    <div className="mt-4 bg-amber-400/10 border border-amber-400/30 rounded-xl px-4 py-3 flex items-center gap-3">
       <span className="text-xl flex-shrink-0">📲</span>
       <div className="flex-1 min-w-0">
         {state === 'ios' ? (

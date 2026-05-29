@@ -52,6 +52,7 @@ export default function Home() {
     async function acquire() {
       if (!('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
       try {
+        await sentinel?.release();
         sentinel = await navigator.wakeLock.request('screen');
       } catch {
         // Wake lock unavailable or denied — silently ignored
@@ -205,8 +206,6 @@ export default function Home() {
           </div>
         </div>
 
-        <InstallPrompt />
-
         {/* Padded content below the card */}
         <div className="px-4">
 
@@ -217,6 +216,8 @@ export default function Home() {
           >
             Generate New Card
           </button>
+
+          <InstallPrompt />
 
           {/* What is this */}
           <div className="mt-6 mb-6">
