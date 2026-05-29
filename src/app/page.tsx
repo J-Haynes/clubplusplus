@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import InstallPrompt from './components/InstallPrompt';
 
 function luhnCheckDigit(partial: string): number {
   const digits = partial.split('').map(Number).reverse();
@@ -17,10 +18,11 @@ function luhnCheckDigit(partial: string): number {
 }
 
 function generateLoyaltyNumber(): string {
-  const prefix = '605917425470';
-  const random = Math.floor(Math.random() * 1000)
+  // 11-digit prefix + 4 random digits + 1 Luhn check = 16 digits (10,000 possible numbers)
+  const prefix = '60591742547';
+  const random = Math.floor(Math.random() * 10000)
     .toString()
-    .padStart(3, '0');
+    .padStart(4, '0');
   const partial = prefix + random;
   return partial + luhnCheckDigit(partial);
 }
@@ -55,20 +57,23 @@ export default function Home() {
         displayValue: true,
         fontSize: 18,
         textMargin: 8,
-        margin: 0,
+        margin: 6,
         height: 210,
         background: '#f8fafc',
         lineColor: '#0f172a',
         font: 'monospace',
       };
 
-      // Measure how wide the barcode is at width=1 (1px per bar module)
+      // Measure the pure bar-module span at width=1, no text, no margins influencing it
       svg.style.display = 'none';
       JsBarcode(svg, cardNumber, { ...opts, width: 1, displayValue: false });
       const baseWidth = parseFloat(svg.getAttribute('width') || '200');
 
-      // Re-render with bar width scaled to fill the container exactly
-      const barWidth = containerWidth / baseWidth;
+      // margin is a fixed pixel value on each side — subtract it from both sides so the
+      // bar modules scale to fill (containerWidth - 2*margin) exactly, not containerWidth.
+      // Without this, the final SVG is narrower than the container and appears off-centre.
+      const margin = opts.margin;
+      const barWidth = (containerWidth - 2 * margin) / (baseWidth - 2 * margin);
       JsBarcode(svg, cardNumber, { ...opts, width: barWidth });
 
       // Make the SVG fill the container width while keeping its natural pixel height
@@ -85,10 +90,29 @@ export default function Home() {
 
   function copyNumber() {
     if (!cardNumber) return;
-    navigator.clipboard.writeText(cardNumber).then(() => {
+
+    const succeed = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    };
+
+    // Clipboard API requires HTTPS — fall back to execCommand on plain HTTP (e.g. LAN dev)
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(cardNumber).then(succeed).catch(fallback);
+    } else {
+      fallback();
+    }
+
+    function fallback() {
+      const el = document.createElement('textarea');
+      el.value = cardNumber;
+      el.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      try { document.execCommand('copy'); succeed(); } catch (_) { /* silent */ }
+      document.body.removeChild(el);
+    }
   }
 
   return (
@@ -160,6 +184,8 @@ export default function Home() {
           </div>
         </div>
 
+        <InstallPrompt />
+
         {/* Padded content below the card */}
         <div className="px-4">
 
@@ -177,8 +203,8 @@ export default function Home() {
               <span className="font-semibold text-slate-300">⚠️ Important Legal-ish Notice</span>
               <br />
               Please <em>DO NOT</em> use this as a replacement for your actual Club+ card. This
-              may result in missing reward points, a mildly confused checkout operator, and —
-              if we&apos;re being honest — a slight improvement to your personal data footprint.
+              may result in missing reward points, a mildly confused checkout operator, and -
+              if we&apos;re being honest - a slight improvement to your personal data footprint.
               Club++ accepts no responsibility for any of the above, or indeed anything at all.
             </p>
           </div>
@@ -192,7 +218,7 @@ export default function Home() {
             <InfoCard
               icon="🛒"
               title="Your basket is more valuable than the points"
-              body="Every scan builds a profile — what you eat, when you shop, how much you spend. That profile is worth a lot more to data brokers and marketers than the 1% cashback you get back."
+              body="Every scan builds a profile. What you eat, when you shop, how much you spend. That profile is worth a lot more to data brokers and marketers than the 1% cashback you get back."
             />
 
             <InfoCard
@@ -202,16 +228,33 @@ export default function Home() {
             />
 
             <InfoCard
-              icon="📋"
-              title="You can ask for your data back"
-              body="Under GDPR, you're legally entitled to see what any company holds on you — just Google 'Subject Access Request [retailer name]'. Most supermarkets have a form for it."
+              icon="🏷️"
+              title="Be a smarter shopper"
+              body={<>Consumer NZ has warned Kiwis to{' '}
+                <a href="https://www.consumer.org.nz/about-us/media-releases/consumer-nz-warns-supermarket-shoppers-beware-of-loyalty-lure" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">&ldquo;beware of the loyalty lure&rdquo;</a>
+                {' '}. Their research found loyalty "special" prices are often not special at all. Before you shop, compare prices at{' '}
+                <a href="https://grocer.nz/" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">grocer.nz</a>
+                {' '}or{' '}
+                <a href="https://grosave.co.nz/" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">grosave.co.nz</a>
+                .</>}
             />
           </div>
 
           <p className="text-center text-slate-600 text-xs pb-4">
             Club++ is a satire project. No data is collected or stored here.{' '}
             <span className="text-slate-500">Unlike actual loyalty schemes.</span>
+            {' '}
           </p>
+          <p className="text-center text-slate-600 text-xs pb-4">            
+            <a
+              href="https://github.com/J-Haynes/clubplusplus"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-600 hover:text-slate-400 underline transition-colors"
+              >
+              Source code
+            </a>
+              </p>
         </div>
       </main>
     </div>
@@ -225,7 +268,7 @@ function InfoCard({
 }: {
   icon: string;
   title: string;
-  body: string;
+  body: React.ReactNode;
 }) {
   return (
     <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
