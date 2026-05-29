@@ -31,6 +31,7 @@ function formatCardNumber(n: string): string {
 
 export default function Home() {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [cardNumber, setCardNumber] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
@@ -43,32 +44,40 @@ export default function Home() {
   }, [generate]);
 
   useEffect(() => {
-    if (!cardNumber || !svgRef.current) return;
+    if (!cardNumber || !svgRef.current || !containerRef.current) return;
+
+    const containerWidth = containerRef.current.offsetWidth;
 
     import('jsbarcode').then(({ default: JsBarcode }) => {
-      JsBarcode(svgRef.current!, cardNumber, {
+      const svg = svgRef.current!;
+      const opts = {
         format: 'CODE128',
         displayValue: true,
         fontSize: 18,
         textMargin: 8,
         margin: 0,
-        width: 2.8,
-        height: 120,
+        height: 210,
         background: '#f8fafc',
         lineColor: '#0f172a',
         font: 'monospace',
-      });
+      };
 
-      const svg = svgRef.current!;
+      // Measure how wide the barcode is at width=1 (1px per bar module)
+      svg.style.display = 'none';
+      JsBarcode(svg, cardNumber, { ...opts, width: 1, displayValue: false });
+      const baseWidth = parseFloat(svg.getAttribute('width') || '200');
+
+      // Re-render with bar width scaled to fill the container exactly
+      const barWidth = containerWidth / baseWidth;
+      JsBarcode(svg, cardNumber, { ...opts, width: barWidth });
+
+      // Make the SVG fill the container width while keeping its natural pixel height
       const w = svg.getAttribute('width');
       const h = svg.getAttribute('height');
       if (w && h) {
         svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        svg.removeAttribute('width');
-        svg.removeAttribute('height');
-        svg.style.width = '100%';
-        svg.style.height = 'auto';
+        svg.setAttribute('width', '100%');
+        // Leave height as the pixel value JsBarcode computed — the container grows around it
         svg.style.display = 'block';
       }
     });
@@ -118,15 +127,17 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Barcode area — full width, no horizontal padding */}
-          <div className="bg-slate-100 py-6">
-            {cardNumber ? (
-              <svg ref={svgRef} />
-            ) : (
-              <div className="h-36 flex items-center justify-center text-slate-400 text-sm">
-                Generating...
-              </div>
-            )}
+          {/* Barcode area */}
+          <div className="bg-slate-100 py-6 px-4">
+            <div ref={containerRef}>
+              {cardNumber ? (
+                <svg ref={svgRef} />
+              ) : (
+                <div className="h-36 flex items-center justify-center text-slate-400 text-sm">
+                  Generating...
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Card bottom strip */}
