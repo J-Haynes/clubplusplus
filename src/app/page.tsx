@@ -45,6 +45,27 @@ export default function Home() {
     generate();
   }, [generate]);
 
+  // Keep the screen awake while the barcode is on display
+  useEffect(() => {
+    let sentinel: WakeLockSentinel | null = null;
+
+    async function acquire() {
+      if (!('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+      try {
+        sentinel = await navigator.wakeLock.request('screen');
+      } catch {
+        // Wake lock unavailable or denied — silently ignored
+      }
+    }
+
+    acquire();
+    document.addEventListener('visibilitychange', acquire);
+    return () => {
+      document.removeEventListener('visibilitychange', acquire);
+      sentinel?.release().catch(() => {});
+    };
+  }, []);
+
   useEffect(() => {
     if (!cardNumber || !svgRef.current || !containerRef.current) return;
 
@@ -197,28 +218,29 @@ export default function Home() {
             Generate New Card
           </button>
 
-          {/* Tongue-in-cheek disclaimer */}
-          <div className="mt-6 mb-16 bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
-            <p className="text-slate-400 text-sm leading-relaxed text-center">
-              <span className="font-semibold text-slate-300">⚠️ Important Legal-ish Notice</span>
-              <br />
-              Please <em>DO NOT</em> use this as a replacement for your actual Club+ card. This
-              may result in missing reward points, a mildly confused checkout operator, and -
-              if we&apos;re being honest - a slight improvement to your personal data footprint.
-              Club++ accepts no responsibility for any of the above, or indeed anything at all.
-            </p>
+          {/* What is this */}
+          <div className="mt-6 mb-6">
+            <h2 className="text-center text-slate-300 font-bold text-base uppercase tracking-widest mb-4">
+              What is this?
+            </h2>
+            <InfoCard
+              icon="💳"
+              title="Your Club++ card"
+              body="A private, randomly generated barcode that scans at the till - no account, no sign-up, no data trail."
+              className="bg-amber-400/10 border border-amber-400/20 rounded-xl p-4"
+            />
           </div>
 
           {/* Info section */}
-          <div className="space-y-4 mb-8">
-            <h2 className="text-center text-slate-300 font-bold text-base uppercase tracking-widest mb-5">
+          <div className="space-y-4 mb-6">
+            <h2 className="text-center text-slate-300 font-bold text-base uppercase tracking-widest mb-4">
               Wait, why does any of this matter?
             </h2>
 
             <InfoCard
               icon="🛒"
               title="Your basket is more valuable than the points"
-              body="Every scan builds a profile. What you eat, when you shop, how much you spend. That profile is worth a lot more to data brokers and marketers than the 1% cashback you get back."
+              body="Every scan builds a profile — what you eat, when you shop, how much you spend. That profile is worth a lot more to data brokers and marketers than the 1% cashback you get back."
             />
 
             <InfoCard
@@ -230,9 +252,9 @@ export default function Home() {
             <InfoCard
               icon="🏷️"
               title="Be a smarter shopper"
-              body={<>Consumer NZ has warned Kiwis to{' '}
+              body={<>Consumer NZ warned Kiwis to{' '}
                 <a href="https://www.consumer.org.nz/about-us/media-releases/consumer-nz-warns-supermarket-shoppers-beware-of-loyalty-lure" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">&ldquo;beware of the loyalty lure&rdquo;</a>
-                {' '}. Their research found loyalty "special" prices are often not special at all. Before you shop, compare prices at{' '}
+                {' '}— their research found loyalty &ldquo;special&rdquo; prices are regularly beaten at Pak&rsquo;nSave without any card. Before you shop, compare at{' '}
                 <a href="https://grocer.nz/" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">grocer.nz</a>
                 {' '}or{' '}
                 <a href="https://grosave.co.nz/" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">grosave.co.nz</a>
@@ -240,20 +262,35 @@ export default function Home() {
             />
           </div>
 
-          <p className="text-center text-slate-600 text-xs pb-4">
-            Club++ is a satire project. No data is collected or stored here.{' '}
+          {/* Legal notice — at the bottom where it belongs */}
+          <div className="mb-6 bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
+            <p className="text-slate-500 text-xs leading-relaxed text-center">
+              <span className="font-semibold text-slate-400">⚠️ Important Legal-ish Notice</span>
+              <br />
+              Please <em>DO NOT</em> use this as a replacement for your actual Club+ card. This
+              may result in missing reward points, a mildly confused checkout operator, and —
+              if we&apos;re being honest — a slight improvement to your personal data footprint.
+              Club++ is not affiliated with any supermarket or loyalty scheme and accepts no
+              responsibility for any of the above, or indeed anything at all.
+            </p>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-slate-600 text-xs pb-6">
+            No data is collected or stored here.{' '}
             <span className="text-slate-500">Unlike actual loyalty schemes.</span>
-            {' '}
+            {' · '}
           </p>
-          <p className="text-center text-slate-600 text-xs pb-4">            
+              <p className="text-center text-slate-600 text-xs pb-6">
             <a
               href="https://github.com/J-Haynes/clubplusplus"
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-600 hover:text-slate-400 underline transition-colors"
-              >
+            >
               Source code
             </a>
+                
               </p>
         </div>
       </main>
@@ -265,13 +302,15 @@ function InfoCard({
   icon,
   title,
   body,
+  className,
 }: {
   icon: string;
   title: string;
   body: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
+    <div className={className ?? 'bg-slate-800/60 border border-slate-700/50 rounded-xl p-4'}>
       <div className="flex gap-3">
         <span className="text-2xl flex-shrink-0 mt-0.5">{icon}</span>
         <div>
