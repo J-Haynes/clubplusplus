@@ -49,11 +49,11 @@ export default function Home() {
       JsBarcode(svgRef.current!, cardNumber, {
         format: 'CODE128',
         displayValue: true,
-        fontSize: 16,
-        textMargin: 6,
-        margin: 14,
-        width: 2.2,
-        height: 80,
+        fontSize: 18,
+        textMargin: 8,
+        margin: 0,
+        width: 2.8,
+        height: 120,
         background: '#f8fafc',
         lineColor: '#0f172a',
         font: 'monospace',
@@ -66,8 +66,10 @@ export default function Home() {
         svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
         svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         svg.removeAttribute('width');
+        svg.removeAttribute('height');
         svg.style.width = '100%';
         svg.style.height = 'auto';
+        svg.style.display = 'block';
       }
     });
   }, [cardNumber]);
@@ -83,7 +85,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="px-4 pt-8 pb-4 text-center">
+      <header className="px-4 pt-10 pb-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <span className="text-2xl">👁️</span>
           <h1 className="text-4xl font-black tracking-tight text-white">
@@ -96,11 +98,10 @@ export default function Home() {
         </p>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 px-4 pb-8 max-w-lg mx-auto w-full">
+      <main className="flex-1 pb-16 max-w-lg mx-auto w-full">
 
-        {/* Card */}
-        <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/50 mb-6">
+        {/* Card — breaks out of any side padding to fill the screen */}
+        <div className="overflow-hidden shadow-2xl shadow-black/50 mb-10">
           {/* Card top strip */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-300 px-4 py-3 flex items-center justify-between">
             <div>
@@ -117,12 +118,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Barcode area */}
-          <div className="bg-slate-100 px-3 py-4">
+          {/* Barcode area — full width, no horizontal padding */}
+          <div className="bg-slate-100 py-6">
             {cardNumber ? (
               <svg ref={svgRef} />
             ) : (
-              <div className="h-28 flex items-center justify-center text-slate-400 text-sm">
+              <div className="h-36 flex items-center justify-center text-slate-400 text-sm">
                 Generating...
               </div>
             )}
@@ -148,68 +149,59 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Generate button */}
-        <button
-          onClick={generate}
-          className="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-900 font-black text-lg py-4 rounded-2xl transition-colors shadow-lg shadow-amber-900/30 mb-6"
-        >
-          Generate New Card
-        </button>
+        {/* Padded content below the card */}
+        <div className="px-4">
 
-        {/* Sub-note */}
-        <p className="text-center text-slate-500 text-xs px-4 mb-10">
-          Show this barcode at the till, just like a real loyalty card. It&apos;s technically
-          valid — but unlike the real thing, this one won&apos;t sell your shopping habits
-          to your insurance company.
-        </p>
+          {/* Generate button */}
+          <button
+            onClick={generate}
+            className="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-900 font-black text-lg py-4 rounded-2xl transition-colors shadow-lg shadow-amber-900/30"
+          >
+            Generate New Card
+          </button>
 
-        {/* Info section */}
-        <div className="space-y-4">
-          <h2 className="text-center text-slate-300 font-bold text-lg uppercase tracking-widest">
-            Why loyalty schemes are bad for you
-          </h2>
+          {/* Tongue-in-cheek disclaimer */}
+          <div className="mt-6 mb-16 bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
+            <p className="text-slate-400 text-sm leading-relaxed text-center">
+              <span className="font-semibold text-slate-300">⚠️ Important Legal-ish Notice</span>
+              <br />
+              Please <em>DO NOT</em> use this as a replacement for your actual Club+ card. This
+              may result in missing reward points, a mildly confused checkout operator, and —
+              if we&apos;re being honest — a slight improvement to your personal data footprint.
+              Club++ accepts no responsibility for any of the above, or indeed anything at all.
+            </p>
+          </div>
 
-          <InfoCard
-            icon="🛒"
-            title="Your shopping basket is a goldmine"
-            body="Every item you scan builds a detailed profile of your diet, lifestyle, health conditions, family size, and income. This isn't a byproduct — it's the entire business model."
-          />
+          {/* Info section */}
+          <div className="space-y-4 mb-8">
+            <h2 className="text-center text-slate-300 font-bold text-base uppercase tracking-widest mb-5">
+              Wait, why does any of this matter?
+            </h2>
 
-          <InfoCard
-            icon="💊"
-            title="It gets sold to insurers and data brokers"
-            body="Loyalty data is routinely sold to data brokers, marketing firms, and in some markets, health and life insurance underwriters. Buying a lot of alcohol or junk food can quietly affect premiums."
-          />
+            <InfoCard
+              icon="🛒"
+              title="Your basket is more valuable than the points"
+              body="Every scan builds a profile — what you eat, when you shop, how much you spend. That profile is worth a lot more to data brokers and marketers than the 1% cashback you get back."
+            />
 
-          <InfoCard
-            icon="📍"
-            title="It reveals where you live, work, and travel"
-            body="Stores with multiple branches can triangulate your home, workplace, and daily patterns from which locations you visit and when. This is incredibly precise location tracking without GPS."
-          />
+            <InfoCard
+              icon="📬"
+              title="It doesn't just power coupons"
+              body="Loyalty data gets shared well beyond sending you targeted offers. It can end up with insurers, research firms, and third-party data brokers. Worth knowing what you're signing up for."
+            />
 
-          <InfoCard
-            icon="💸"
-            title="The 'discount' is a terrible deal"
-            body="Typical loyalty schemes return around 0.5–1% of your spend as points. Meanwhile, the data they collect about you is worth orders of magnitude more. You're selling your privacy for the price of a coffee."
-          />
+            <InfoCard
+              icon="📋"
+              title="You can ask for your data back"
+              body="Under GDPR, you're legally entitled to see what any company holds on you — just Google 'Subject Access Request [retailer name]'. Most supermarkets have a form for it."
+            />
+          </div>
 
-          <InfoCard
-            icon="🔗"
-            title="Your data lives forever"
-            body="Unlike a bad purchase, your data profile can't be returned. It gets aggregated, re-sold, and enriched with data from other sources for years. Deleting your account rarely deletes your data."
-          />
-
-          <InfoCard
-            icon="🛡️"
-            title="How to protect yourself"
-            body="Use cash where possible, or generated cards like this one. In the UK, you can request a copy of your data under GDPR (Subject Access Request) and ask for deletion. Supermarkets are required to comply."
-          />
+          <p className="text-center text-slate-600 text-xs pb-4">
+            Club++ is a satire project. No data is collected or stored here.{' '}
+            <span className="text-slate-500">Unlike actual loyalty schemes.</span>
+          </p>
         </div>
-
-        <p className="text-center text-slate-600 text-xs mt-8 pb-4">
-          Club++ is a satire project. No data is collected or stored.{' '}
-          <span className="text-slate-500">Unlike actual loyalty schemes.</span>
-        </p>
       </main>
     </div>
   );
