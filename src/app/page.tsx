@@ -140,7 +140,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="px-4 pt-10 pb-6 text-center">
+      <header className="px-4 pt-10 pb-0 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <span className="text-2xl">👁️</span>
           <h1 className="text-4xl font-black tracking-tight text-white">
@@ -148,15 +148,16 @@ export default function Home() {
           </h1>
           <span className="text-2xl">👁️</span>
         </div>
-        <p className="text-slate-400 text-sm font-medium uppercase tracking-widest">
+        <p className="text-slate-400 text-sm font-medium uppercase tracking-widest mb-4">
           Earn points. Lose privacy. Repeat.
         </p>
+        <Mascot className="w-32 mx-auto" />
       </header>
 
       <main className="flex-1 pb-16 max-w-lg mx-auto w-full">
 
         {/* Card — breaks out of any side padding to fill the screen */}
-        <div className="overflow-hidden shadow-2xl shadow-black/50 mb-10">
+        <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/50 mb-10">
           {/* Card top strip */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-300 px-4 py-3 flex items-center justify-between">
             <div>
@@ -241,7 +242,7 @@ export default function Home() {
             <InfoCard
               icon="🛒"
               title="Your basket is more valuable than the points"
-              body="Every scan builds a profile — what you eat, when you shop, how much you spend. That profile is worth a lot more to data brokers and marketers than the 1% cashback you get back."
+              body='Every scan builds a profile - what you eat, when you shop, how much you spend. That profile is worth a lot more to data brokers and marketers than reward points or member "deals".'
             />
 
             <InfoCard
@@ -255,7 +256,7 @@ export default function Home() {
               title="Be a smarter shopper"
               body={<>Consumer NZ warned Kiwis to{' '}
                 <a href="https://www.consumer.org.nz/about-us/media-releases/consumer-nz-warns-supermarket-shoppers-beware-of-loyalty-lure" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">&ldquo;beware of the loyalty lure&rdquo;</a>
-                {' '}— their research found loyalty &ldquo;special&rdquo; prices are regularly beaten at Pak&rsquo;nSave without any card. Before you shop, compare at{' '}
+                {' '}- their research found loyalty &ldquo;special&rdquo; prices are regularly not "deals" at all. Before you shop, compare prices at{' '}
                 <a href="https://grocer.nz/" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">grocer.nz</a>
                 {' '}or{' '}
                 <a href="https://grosave.co.nz/" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">grosave.co.nz</a>
@@ -266,11 +267,10 @@ export default function Home() {
           {/* Legal notice — at the bottom where it belongs */}
           <div className="mb-6 bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
             <p className="text-slate-500 text-xs leading-relaxed text-center">
-              <span className="font-semibold text-slate-400">⚠️ Important Legal-ish Notice</span>
+              <span className="font-semibold text-slate-400">⚠️ Important Notice</span>
               <br />
               Please <em>DO NOT</em> use this as a replacement for your actual Club+ card. This
-              may result in missing reward points, a mildly confused checkout operator, and —
-              if we&apos;re being honest — a slight improvement to your personal data footprint.
+              may result in missing reward points and/or a meaningful improvement to your personal data footprint.
               Club++ is not affiliated with any supermarket or loyalty scheme and accepts no
               responsibility for any of the above, or indeed anything at all.
             </p>
@@ -320,5 +320,41 @@ function InfoCard({
         </div>
       </div>
     </div>
+  );
+}
+
+function Mascot({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 144 86"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Starburst — amber instead of original purple */}
+      <g transform="translate(8.68,7.28) scale(0.34)">
+        <path
+          fill="#fbbf24"
+          d="M189.09,35.75 L219.04,0 L236.42,43.17 L276.02,18.43 L279.12,64.83
+             L324.5,53.41 L313.01,98.48 L359.69,101.6 L334.76,140.97 L378.22,158.21
+             L342.27,188.02 L378.22,217.79 L334.76,235.07 L359.69,274.43 L313.01,277.52
+             L324.5,322.59 L279.12,311.21 L276.02,357.61 L236.42,332.83 L219.04,376
+             L189.09,340.29 L159.15,376 L141.76,332.83 L102.17,357.61 L99.07,311.21
+             L53.73,322.59 L65.18,277.52 L18.5,274.43 L43.42,235.07 L0,217.79
+             L35.92,188.02 L0,158.21 L43.42,140.97 L18.5,101.6 L65.18,98.48
+             L53.73,53.41 L99.07,64.83 L102.17,18.43 L141.76,43.17 L159.15,0 Z"
+        />
+      </g>
+
+      {/* Left eye — white sclera + dark pupil directly on amber starburst */}
+      <circle cx="59.9" cy="63.6" r="9.5" fill="white" />
+      <circle cx="59.9" cy="63.6" r="3.5" fill="#282820" />
+      <circle cx="59.9" cy="63.6" r="1.2" fill="#fbbf24" />
+
+      {/* Right eye */}
+      <circle cx="83.1" cy="63.5" r="9.5" fill="white" />
+      <circle cx="83.1" cy="63.5" r="3.5" fill="#282820" />
+      <circle cx="83.1" cy="63.5" r="1.2" fill="#fbbf24" />
+    </svg>
   );
 }
