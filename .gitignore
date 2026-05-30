@@ -17,3 +17,5 @@ public/workbox-*.js.map
 npm-debug.log*
 .env
 .env*.local
+.vercel
+.env*
