@@ -289,7 +289,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="text-slate-600 hover:text-slate-400 underline transition-colors"
             >
-              Source code
+              Source
             </a>
                 
               </p>
