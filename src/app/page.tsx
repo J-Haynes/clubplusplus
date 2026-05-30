@@ -98,13 +98,13 @@ export default function Home() {
       const barWidth = (containerWidth - 2 * margin) / (baseWidth - 2 * margin);
       JsBarcode(svg, cardNumber, { ...opts, width: barWidth });
 
-      // Make the SVG fill the container width while keeping its natural pixel height
-      const w = svg.getAttribute('width');
-      const h = svg.getAttribute('height');
+      // Make the SVG fill the container width while keeping its natural pixel height.
+      // parseFloat strips any "px" unit JsBarcode may append — viewBox requires bare numbers.
+      const w = parseFloat(svg.getAttribute('width') || '0');
+      const h = parseFloat(svg.getAttribute('height') || '0');
       if (w && h) {
         svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
         svg.setAttribute('width', '100%');
-        // Leave height as the pixel value JsBarcode computed — the container grows around it
         svg.style.display = 'block';
       }
     });
