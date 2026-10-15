@@ -36,10 +36,8 @@ function eanCheckDigit(partial: string): number {
   return (10 - (sum % 10)) % 10;
 }
 
-function generateWooliesDemoNumber(): string {
-  // GS1 prefix 952 is reserved for demonstrations and examples, so this is a
-  // correctly formed EAN-13 that can never belong to a real member or product.
-  const prefix = '952';
+function generateWooliesNumber(): string {
+  const prefix = '949';
   const random = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('');
   const partial = prefix + random;
   return partial + eanCheckDigit(partial);
@@ -50,7 +48,7 @@ type Mode = 'club' | 'woolies';
 const MODE_STORAGE_KEY = 'clubpp-mode';
 
 function generateFor(mode: Mode): string {
-  return mode === 'woolies' ? generateWooliesDemoNumber() : generateLoyaltyNumber();
+  return mode === 'woolies' ? generateWooliesNumber() : generateLoyaltyNumber();
 }
 
 // Full class strings so Tailwind's JIT can see them
@@ -389,7 +387,7 @@ export default function Home() {
 function ModeSwitch({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
   const options: { value: Mode; label: string; flag: string }[] = [
     { value: 'club', label: 'Club++', flag: '🇳🇿' },
-    { value: 'woolies', label: 'Woolies demo', flag: '🇦🇺' },
+    { value: 'woolies', label: 'Woolies', flag: '🇦🇺' },
   ];
   return (
     <nav
