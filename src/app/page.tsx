@@ -301,9 +301,9 @@ export default function Home() {
             </h2>
             {mode === 'woolies' ? (
               <InfoCard
-                icon="🧪"
-                title="Woolies mode is a demo"
-                body="A correctly formed EAN-13 barcode in GS1's 952 range, which is reserved for demonstrations. It looks like an Australian Everyday Rewards card but belongs to no one, so it won't scan as a member at the checkout."
+                icon="💳"
+                title="Your private Woolies Card"
+                body="A private, randomly generated barcode that scans at the till - no account, no sign-up, no data trail."
                 className={theme.infoCard}
               />
             ) : (
