@@ -1,7 +1,7 @@
 {
   "name": "Club++",
   "short_name": "Club++",
-  "description": "Earn points. Lose privacy. Repeat.",
+  "description": "Earn points. Lose privacy.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020617",

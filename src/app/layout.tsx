@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://clubplusplus.nz'),
   alternates: { canonical: '/' },
   title: 'Club++ | The Loyalty Card That Knows You Too Well',
-  description: 'Earn points. Lose privacy. Repeat. A satirical loyalty card barcode generator for NZ supermarkets.',
+  description: 'Earn points. Lose privacy. A satirical loyalty card barcode generator for NZ supermarkets.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -14,14 +14,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Club++',
-    description: 'Earn points. Lose privacy. Repeat.',
+    description: 'Earn points. Lose privacy.',
     type: 'website',
     siteName: 'Club++',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Club++',
-    description: 'Earn points. Lose privacy. Repeat.',
+    description: 'Earn points. Lose privacy.',
   },
   other: {
     'mobile-web-app-capable': 'yes',
