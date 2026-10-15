@@ -37,7 +37,7 @@ npm run build   # run before pushing - there are no tests, the build is the chec
 - **Modes:** a switch fixed to the bottom of the screen toggles `club` (default: NZ Club++ CODE128 number) and `woolies` (Australian Woolworths-styled demo). The choice is saved in `localStorage` under `clubpp-mode`. Theme classes live in the `THEMES` object as full strings so Tailwind's JIT picks them up. Each mode has its own mascot (`Mascot` / `WooliesMascot`).
 - **Screen wake lock** keeps the display on while the barcode is shown.
 - Palette: slate background (`#020617` / `slate-950`) with amber accents (`#fbbf24` / `amber-400`). Theme colour is duplicated in `layout.tsx`, `manifest.json` and the `next/og` icon files.
-- Tone is tongue-in-cheek; keep copy consistent with the "Earn points. Lose privacy. Repeat." voice.
+- Tone is tongue-in-cheek; keep copy consistent with the "Earn points. Lose privacy." voice.
 
 ## Deploying
 

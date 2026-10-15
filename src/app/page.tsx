@@ -214,7 +214,7 @@ export default function Home() {
           <span className="text-2xl">👁️</span>
         </div>
         <p className="text-slate-400 text-sm font-medium uppercase tracking-widest mb-4">
-          Earn points. Lose privacy. Repeat.
+          Earn points. Lose privacy.
         </p>
         {mode === 'woolies' ? (
           <WooliesMascot className="w-32 mx-auto" />
@@ -235,13 +235,13 @@ export default function Home() {
                 <span className={theme.stripPlus}>++</span>
               </p>
               <p className={`${theme.stripSub} text-xs font-semibold`}>
-                {mode === 'woolies' ? 'DEMO CARD · NOT A REAL MEMBER' : <>LOYALTY &amp; SURVEILLANCE CARD</>}
+                {mode === 'woolies' ? 'EVERYDAY SURVEILLANCE' : <>LOYALTY &amp; SURVEILLANCE CARD</>}
               </p>
             </div>
             <div className="text-right">
               <p className={`${theme.stripSub} text-xs`}>Member Since</p>
               <p className={`${theme.stripTitle} font-bold text-sm`}>
-                {mode === 'woolies' ? 'NEVER' : 'RIGHT NOW'}
+                {mode === 'woolies' ? 'RIGHT NOW' : 'RIGHT NOW'}
               </p>
             </div>
           </div>

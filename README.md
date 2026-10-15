@@ -1,6 +1,6 @@
 # Club++ [clubplusplus.nz](https://clubplusplus.nz)
 
-> Earn points. Lose privacy. Repeat.
+> Earn points. Lose privacy.
 
 A satirical next.js loyalty card barcode generator. Shows how supermarket loyalty schemes work — and why they're not actually in your interest.
 
