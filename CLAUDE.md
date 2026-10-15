@@ -34,6 +34,8 @@ npm run build   # run before pushing - there are no tests, the build is the chec
 
 - **Strict CSP** in `next.config.ts`: everything is `'self'` only. External scripts, fonts, images or API calls will be blocked unless the CSP is updated too.
 - **Barcode sizing** in `page.tsx` is deliberate: it renders once at width 1 to measure, then scales bar width so the barcode fills the container exactly, then swaps to a `viewBox`. Read the comments before changing it.
+- **Modes:** a switch fixed to the bottom of the screen toggles `club` (default: NZ Club++ CODE128 number) and `woolies` (Australian Woolworths-styled demo). The choice is saved in `localStorage` under `clubpp-mode`. Theme classes live in the `THEMES` object as full strings so Tailwind's JIT picks them up. Each mode has its own mascot (`Mascot` / `WooliesMascot`).
+- **Woolies mode is a demo on purpose:** it generates EAN-13 numbers under GS1 prefix `952`, which is reserved for demos and examples, so it never matches a real Everyday Rewards member. Don't change it to produce real member numbers: those belong to real people, and scanning one can spend their rewards. Avoid the 20–29 in-store range too, since those codes can encode priced, weighed items.
 - **Screen wake lock** keeps the display on while the barcode is shown.
 - Palette: slate background (`#020617` / `slate-950`) with amber accents (`#fbbf24` / `amber-400`). Theme colour is duplicated in `layout.tsx`, `manifest.json` and the `next/og` icon files.
 - Tone is tongue-in-cheek; keep copy consistent with the "Earn points. Lose privacy. Repeat." voice.

@@ -27,23 +27,88 @@ function generateLoyaltyNumber(): string {
   return partial + luhnCheckDigit(partial);
 }
 
+// EAN-13 check digit: weights alternate 1,3 from the left over the first 12 digits
+function eanCheckDigit(partial: string): number {
+  const sum = partial
+    .split('')
+    .map(Number)
+    .reduce((acc, d, i) => acc + d * (i % 2 === 0 ? 1 : 3), 0);
+  return (10 - (sum % 10)) % 10;
+}
+
+function generateWooliesDemoNumber(): string {
+  // GS1 prefix 952 is reserved for demonstrations and examples, so this is a
+  // correctly formed EAN-13 that can never belong to a real member or product.
+  const prefix = '952';
+  const random = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('');
+  const partial = prefix + random;
+  return partial + eanCheckDigit(partial);
+}
+
+type Mode = 'club' | 'woolies';
+
+const MODE_STORAGE_KEY = 'clubpp-mode';
+
+function generateFor(mode: Mode): string {
+  return mode === 'woolies' ? generateWooliesDemoNumber() : generateLoyaltyNumber();
+}
+
+// Full class strings so Tailwind's JIT can see them
+const THEMES = {
+  club: {
+    accent: 'text-amber-400',
+    strip: 'bg-gradient-to-r from-amber-500 to-amber-300',
+    stripTitle: 'text-slate-900',
+    stripSub: 'text-slate-800',
+    stripPlus: 'text-slate-700',
+    button: 'bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-900 shadow-amber-900/30',
+    infoCard: 'bg-amber-400/10 border border-amber-400/20 rounded-xl p-4',
+    toggleActive: 'bg-amber-400 text-slate-900',
+  },
+  woolies: {
+    accent: 'text-green-400',
+    strip: 'bg-gradient-to-r from-green-700 to-green-500',
+    stripTitle: 'text-white',
+    stripSub: 'text-green-50',
+    stripPlus: 'text-green-200',
+    button: 'bg-green-500 hover:bg-green-400 active:bg-green-600 text-white shadow-green-900/30',
+    infoCard: 'bg-green-500/10 border border-green-500/20 rounded-xl p-4',
+    toggleActive: 'bg-green-500 text-white',
+  },
+} as const;
+
 function formatCardNumber(n: string): string {
+  if (n.length === 13) return `${n[0]} ${n.slice(1, 7)} ${n.slice(7)}`;
   return n.replace(/(.{4})/g, '$1 ').trim();
 }
 
 export default function Home() {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<Mode>('club');
   const [cardNumber, setCardNumber] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const theme = THEMES[mode];
 
   const generate = useCallback(() => {
-    setCardNumber(generateLoyaltyNumber());
+    setCardNumber(generateFor(mode));
+  }, [mode]);
+
+  // Mode and number change together so the barcode never renders a number in the wrong format
+  const switchMode = useCallback((next: Mode) => {
+    setMode(next);
+    setCardNumber(generateFor(next));
+    try { localStorage.setItem(MODE_STORAGE_KEY, next); } catch { /* storage unavailable */ }
   }, []);
 
   useEffect(() => {
-    generate();
-  }, [generate]);
+    let saved: Mode = 'club';
+    try {
+      if (localStorage.getItem(MODE_STORAGE_KEY) === 'woolies') saved = 'woolies';
+    } catch { /* storage unavailable */ }
+    setMode(saved);
+    setCardNumber(generateFor(saved));
+  }, []);
 
   // Keep the screen awake while the barcode is on display
   useEffect(() => {
@@ -74,8 +139,10 @@ export default function Home() {
 
     import('jsbarcode').then(({ default: JsBarcode }) => {
       const svg = svgRef.current!;
+      const isEan = cardNumber.length === 13;
       const opts = {
-        format: 'CODE128',
+        format: isEan ? 'EAN13' : 'CODE128',
+        flat: true,
         displayValue: true,
         fontSize: 18,
         textMargin: 8,
@@ -144,33 +211,40 @@ export default function Home() {
         <div className="flex items-center justify-center gap-2 mb-2">
           <span className="text-2xl">👁️</span>
           <h1 className="text-4xl font-black tracking-tight text-white">
-            Club<span className="text-amber-400">++</span>
+            Club<span className={theme.accent}>++</span>
           </h1>
           <span className="text-2xl">👁️</span>
         </div>
         <p className="text-slate-400 text-sm font-medium uppercase tracking-widest mb-4">
           Earn points. Lose privacy. Repeat.
         </p>
-        <Mascot className="w-32 mx-auto" />
+        {mode === 'woolies' ? (
+          <WooliesMascot className="w-32 mx-auto" />
+        ) : (
+          <Mascot className="w-32 mx-auto" />
+        )}
       </header>
 
-      <main className="flex-1 pb-16 max-w-lg mx-auto w-full">
+      <main className="flex-1 pb-28 max-w-lg mx-auto w-full">
 
         {/* Card — breaks out of any side padding to fill the screen */}
         <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/50 mb-10">
           {/* Card top strip */}
-          <div className="bg-gradient-to-r from-amber-500 to-amber-300 px-4 py-3 flex items-center justify-between">
+          <div className={`${theme.strip} px-4 py-3 flex items-center justify-between`}>
             <div>
-              <p className="text-slate-900 font-black text-lg leading-none">
-                Club<span className="text-slate-700">++</span>
+              <p className={`${theme.stripTitle} font-black text-lg leading-none`}>
+                {mode === 'woolies' ? 'Woolies' : 'Club'}
+                <span className={theme.stripPlus}>++</span>
               </p>
-              <p className="text-slate-800 text-xs font-semibold">
-                LOYALTY &amp; SURVEILLANCE CARD
+              <p className={`${theme.stripSub} text-xs font-semibold`}>
+                {mode === 'woolies' ? 'DEMO CARD · NOT A REAL MEMBER' : <>LOYALTY &amp; SURVEILLANCE CARD</>}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-slate-800 text-xs">Member Since</p>
-              <p className="text-slate-900 font-bold text-sm">RIGHT NOW</p>
+              <p className={`${theme.stripSub} text-xs`}>Member Since</p>
+              <p className={`${theme.stripTitle} font-bold text-sm`}>
+                {mode === 'woolies' ? 'NEVER' : 'RIGHT NOW'}
+              </p>
             </div>
           </div>
 
@@ -194,7 +268,9 @@ export default function Home() {
                 Card Number
               </p>
               <p className="text-white font-mono font-bold text-base tracking-widest">
-                {cardNumber ? formatCardNumber(cardNumber) : '---- ---- ---- ----'}
+                {cardNumber
+                  ? formatCardNumber(cardNumber)
+                  : mode === 'woolies' ? '- ------ ------' : '---- ---- ---- ----'}
               </p>
             </div>
             <button
@@ -213,7 +289,7 @@ export default function Home() {
           {/* Generate button */}
           <button
             onClick={generate}
-            className="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-900 font-black text-lg py-4 rounded-2xl transition-colors shadow-lg shadow-amber-900/30"
+            className={`w-full ${theme.button} font-black text-lg py-4 rounded-2xl transition-colors shadow-lg`}
           >
             Generate New Card
           </button>
@@ -225,12 +301,21 @@ export default function Home() {
             <h2 className="text-center text-slate-300 font-bold text-base uppercase tracking-widest mb-4">
               What is this?
             </h2>
-            <InfoCard
-              icon="💳"
-              title="Your Club++ card"
-              body="A private, randomly generated barcode that scans at the till - no account, no sign-up, no data trail."
-              className="bg-amber-400/10 border border-amber-400/20 rounded-xl p-4"
-            />
+            {mode === 'woolies' ? (
+              <InfoCard
+                icon="🧪"
+                title="Woolies mode is a demo"
+                body="A correctly formed EAN-13 barcode in GS1's 952 range, which is reserved for demonstrations. It looks like an Australian Everyday Rewards card but belongs to no one, so it won't scan as a member at the checkout."
+                className={theme.infoCard}
+              />
+            ) : (
+              <InfoCard
+                icon="💳"
+                title="Your Club++ card"
+                body="A private, randomly generated barcode that scans at the till - no account, no sign-up, no data trail."
+                className={theme.infoCard}
+              />
+            )}
           </div>
 
           {/* Info section */}
@@ -282,7 +367,7 @@ export default function Home() {
             <span className="text-slate-500">Unlike actual loyalty schemes.</span>
             {' · '}
           </p>
-              <p className="text-center text-slate-600 text-xs pb-6">
+          <p className="text-center text-slate-600 text-xs pb-6">
             <a
               href="https://github.com/J-Haynes/clubplusplus"
               target="_blank"
@@ -295,7 +380,42 @@ export default function Home() {
               </p>
         </div>
       </main>
+
+      <ModeSwitch mode={mode} onChange={switchMode} />
     </div>
+  );
+}
+
+function ModeSwitch({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
+  const options: { value: Mode; label: string; flag: string }[] = [
+    { value: 'club', label: 'Club++', flag: '🇳🇿' },
+    { value: 'woolies', label: 'Woolies demo', flag: '🇦🇺' },
+  ];
+  return (
+    <nav
+      aria-label="Card mode"
+      className="fixed inset-x-0 bottom-0 z-50 bg-slate-950/90 backdrop-blur border-t border-slate-800 pb-[env(safe-area-inset-bottom)]"
+    >
+      <div role="radiogroup" className="max-w-lg mx-auto px-4 py-3 flex gap-2">
+        {options.map((o) => {
+          const active = mode === o.value;
+          return (
+            <button
+              key={o.value}
+              role="radio"
+              aria-checked={active}
+              onClick={() => onChange(o.value)}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors ${
+                active ? THEMES[o.value].toggleActive : 'bg-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <span className="mr-1.5">{o.flag}</span>
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -355,6 +475,33 @@ function Mascot({ className }: { className?: string }) {
       <circle cx="83.1" cy="63.5" r="9.5" fill="white" />
       <circle cx="83.1" cy="63.5" r="3.5" fill="#282820" />
       <circle cx="83.1" cy="63.5" r="1.2" fill="#fbbf24" />
+    </svg>
+  );
+}
+
+function WooliesMascot({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 144 86"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Apple rising from the bottom edge, same crop as the Club++ starburst */}
+      <rect x="69.5" y="18" width="5" height="20" rx="2.5" fill="#78350f" />
+      <ellipse cx="88" cy="26" rx="14" ry="6" transform="rotate(-28 88 26)" fill="#4ade80" />
+      <circle cx="56" cy="74" r="38" fill="#16a34a" />
+      <circle cx="88" cy="74" r="38" fill="#16a34a" />
+
+      {/* Left eye */}
+      <circle cx="59.9" cy="63.6" r="9.5" fill="white" />
+      <circle cx="59.9" cy="63.6" r="3.5" fill="#282820" />
+      <circle cx="59.9" cy="63.6" r="1.2" fill="#4ade80" />
+
+      {/* Right eye */}
+      <circle cx="83.1" cy="63.5" r="9.5" fill="white" />
+      <circle cx="83.1" cy="63.5" r="3.5" fill="#282820" />
+      <circle cx="83.1" cy="63.5" r="1.2" fill="#4ade80" />
     </svg>
   );
 }

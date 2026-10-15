@@ -32,6 +32,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: '#020617',
+  viewportFit: 'cover', // lets the fixed mode switch pad for the iPhone home indicator
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
